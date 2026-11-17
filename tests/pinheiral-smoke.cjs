@@ -5,7 +5,7 @@ const path = require('path');
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
-  await page.goto('file://' + path.resolve('pinheiral.html'));
+  await page.goto('file://' + path.resolve('pinheiral.html') + '?test=1');
   await page.waitForSelector('#nw', { state: 'visible', timeout: 30000 });
   await page.waitForTimeout(1000);
   await page.locator('#nw').click();
