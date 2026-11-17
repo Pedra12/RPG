@@ -18,6 +18,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Install image inspection dependency
+        run: python3 -m pip install --quiet Pillow
+
       - name: Recursively extract ZIP archives and inventory assets
         shell: bash
         run: |
@@ -151,3 +154,5 @@ jobs:
           path: audit-output/
           if-no-files-found: error
           retention-days: 7
+
+# Trigger audit runner on this workflow update.
