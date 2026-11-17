@@ -1,0 +1,47 @@
+{
+  "schema": "pinheiral.animation-assets.v1",
+  "source_pack": "Pixel Crawler - Free Pack (Exterior 0.1)",
+  "status": "pilot-validated",
+  "note": "Frame sizes and counts were checked against the actual PNG sheets in a visual contact sheet. FPS is intentionally unset; it must be tuned in-game. This registry is separate from pinheiral.html and does not change runtime behavior.",
+  "entities": {
+    "skeleton_base": {
+      "source": "Entities/Mobs/Skeleton Crew/Skeleton - Base",
+      "animations": {
+        "idle": {"path": "Idle/Idle-Sheet.png", "sheet": [128, 32], "frame": [32, 32], "frames": 4},
+        "run": {"path": "Run/Run-Sheet.png", "sheet": [384, 64], "frame": [64, 64], "frames": 6},
+        "death": {"path": "Death/Death-Sheet.png", "sheet": [768, 64], "frame": [64, 64], "frames": 12}
+      }
+    },
+    "orc_base": {
+      "source": "Entities/Mobs/Orc Crew/Orc",
+      "animations": {
+        "idle": {"path": "Idle/Idle-Sheet.png", "sheet": [128, 32], "frame": [32, 32], "frames": 4},
+        "run": {"path": "Run/Run-Sheet.png", "sheet": [384, 64], "frame": [64, 64], "frames": 6},
+        "death": {"path": "Death/Death-Sheet.png", "sheet": [384, 64], "frame": [64, 64], "frames": 6}
+      }
+    },
+    "knight": {
+      "source": "Entities/Npc's/Knight",
+      "animations": {
+        "idle": {"path": "Idle/Idle-Sheet.png", "sheet": [128, 32], "frame": [32, 32], "frames": 4},
+        "run": {"path": "Run/Run-Sheet.png", "sheet": [384, 64], "frame": [64, 64], "frames": 6},
+        "death": {"path": "Death/Death-Sheet.png", "sheet": [288, 32], "frame": [32, 32], "frames": 9}
+      }
+    },
+    "wizard": {
+      "source": "Entities/Npc's/Wizzard",
+      "animations": {
+        "idle": {"path": "Idle/Idle-Sheet.png", "sheet": [128, 32], "frame": [32, 32], "frames": 4},
+        "run": {"path": "Run/Run-Sheet.png", "sheet": [384, 64], "frame": [64, 64], "frames": 6},
+        "death": {"path": "Death/Death-Sheet.png", "sheet": [384, 32], "frame": [32, 32], "frames": 12}
+      }
+    }
+  },
+  "integration_rules": [
+    "Do not edit the existing M sprite table or dr() renderer in pinheiral.html for this pilot.",
+    "Do not replace existing EN, mob(), de(), collision, map, save, or story logic.",
+    "Load these sheets through a separate registry and a new opt-in drawing path only after the binary PNGs are copied into the repository.",
+    "Keep original source dimensions and nearest-neighbor pixel rendering.",
+    "Do not infer animation FPS from the sheet; tune it separately and test on Android."
+  ]
+}
