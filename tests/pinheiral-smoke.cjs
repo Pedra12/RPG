@@ -1,0 +1,20 @@
+const { chromium } = require('playwright');
+const path = require('path');
+(async () => {
+  const browser = await chromium.launch({ headless: true });
+  const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+  const errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  await page.goto('file://' + path.resolve('pinheiral.html'));
+  await page.waitForSelector('#nw', { state: 'visible', timeout: 30000 });
+  await page.waitForTimeout(1000);
+  await page.locator('#nw').click();
+  await page.waitForSelector('#dlg', { state: 'visible', timeout: 10000 });
+  const title = await page.title();
+  if (title !== 'Crônicas de Pinheiral') throw new Error('Título incorreto: ' + title);
+  const canvas = await page.locator('#c').evaluate(el => ({ width: el.width, height: el.height }));
+  if (!canvas.width || !canvas.height) throw new Error('Canvas sem dimensões');
+  if (errors.length) throw new Error('Erros JS: ' + errors.join(' | '));
+  console.log(JSON.stringify({ boot: 'ok', newGame: 'ok', dialogue: 'ok', canvas, pageErrors: errors.length }));
+  await browser.close();
+})().catch(e => { console.error(e); process.exit(1); });
