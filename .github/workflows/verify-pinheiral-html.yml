@@ -1,0 +1,34 @@
+name: Verify and package Pinheiral HTML
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'pinheiral.html'
+      - '.github/workflows/verify-pinheiral-html.yml'
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Extract and syntax-check game JavaScript
+        run: |
+          python - <<'PY'
+          import re
+          html = open('pinheiral.html', encoding='utf-8').read()
+          scripts = re.findall(r'<script>(.*?)</script>', html, re.S)
+          assert scripts, 'No inline game script found'
+          open('/tmp/pinheiral.js', 'w', encoding='utf-8').write('\n'.join(scripts))
+          print('HTML bytes:', len(html.encode()))
+          print('Inline scripts:', len(scripts))
+          PY
+          node --check /tmp/pinheiral.js
+      - name: Package final HTML
+        uses: actions/upload-artifact@v4
+        with:
+          name: cronicas-pinheiral-html
+          path: pinheiral.html
+          if-no-files-found: error
+          retention-days: 14
