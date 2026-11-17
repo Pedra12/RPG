@@ -1,0 +1,241 @@
+{
+  "schema": "pinheiral.story-expansion.v1",
+  "status": "content-designed-not-integrated",
+  "language": "pt-BR",
+  "region": {
+    "id": "gray_hills",
+    "displayName": "Colinas Cinzentas",
+    "mapId": 3,
+    "widthTiles": 56,
+    "heightTiles": 36,
+    "tileSize": 16,
+    "entry": "south_road",
+    "returnTo": {
+      "mapId": 0,
+      "spawn": "north_gate_return"
+    }
+  },
+  "unlock": {
+    "afterMainEnding": true,
+    "branches": [
+      "share_crystal",
+      "keep_crystal"
+    ],
+    "branchRules": "As duas escolhas liberam a região; alteram diálogos, disponibilidade inicial de NPCs e hostilidade, mas nenhuma bloqueia o arco principal."
+  },
+  "mainQuest": {
+    "id": "gray_hills_main",
+    "title": "A Água que a Pedra Esconde",
+    "stages": [
+      {
+        "id": "road",
+        "title": "A estrada sem água",
+        "summary": "Receber o pedido da mensageira e chegar à aldeia do vale.",
+        "objectives": [
+          "Falar com Lina em Pinheiral",
+          "Encontrar Lina na estrada seca",
+          "Conhecer Dário na aldeia"
+        ]
+      },
+      {
+        "id": "well",
+        "title": "O poço vazio",
+        "summary": "Investigar o poço e recuperar as três peças da bomba antiga.",
+        "objectives": [
+          "Examinar o poço",
+          "Encontrar a peça na estrada",
+          "Encontrar a peça na aldeia",
+          "Encontrar a peça na pedreira"
+        ]
+      },
+      {
+        "id": "aqueduct",
+        "title": "O aqueduto partido",
+        "summary": "Abrir as duas comportas e seguir o canal até a passagem subterrânea.",
+        "objectives": [
+          "Localizar a primeira comporta",
+          "Localizar a segunda comporta",
+          "Investigar o desvio de água"
+        ]
+      },
+      {
+        "id": "quarry",
+        "title": "A pedreira dos exilados",
+        "summary": "Resolver o conflito na pedreira por combate ou negociação.",
+        "objectives": [
+          "Encontrar Narek",
+          "Descobrir a origem da máquina",
+          "Liberar a passagem subterrânea"
+        ]
+      },
+      {
+        "id": "observatory",
+        "title": "As lentes do observatório",
+        "summary": "Recuperar e alinhar as três lentes.",
+        "objectives": [
+          "Encontrar a lente norte",
+          "Encontrar a lente oeste",
+          "Encontrar a lente sul",
+          "Alinhar o mecanismo"
+        ]
+      },
+      {
+        "id": "spring",
+        "title": "A nascente de pedra",
+        "summary": "Acessar a câmara da nascente e derrotar ou conter o Guardião de Basalto.",
+        "objectives": [
+          "Descer à câmara",
+          "Desativar o mecanismo antigo",
+          "Enfrentar o Guardião de Basalto",
+          "Escolher como distribuir a água"
+        ]
+      },
+      {
+        "id": "pact",
+        "title": "Um pacto para o vale",
+        "summary": "Concluir o arco de acordo com alianças e escolha do Cristal.",
+        "objectives": [
+          "Reunir representantes",
+          "Definir o pacto",
+          "Voltar à aldeia"
+        ]
+      }
+    ]
+  },
+  "sideQuests": [
+    {
+      "id": "gray_seed_last",
+      "title": "A última semente",
+      "giver": "Mira",
+      "objectives": [
+        "Encontrar 4 sementes resistentes",
+        "Entregar as sementes"
+      ],
+      "reward": {
+        "xp": 30,
+        "coins": 18,
+        "unlock": "restored_garden"
+      }
+    },
+    {
+      "id": "gray_lost_tools",
+      "title": "Ferramentas perdidas",
+      "giver": "Bram",
+      "objectives": [
+        "Recuperar 3 ferramentas na pedreira",
+        "Devolver as ferramentas"
+      ],
+      "reward": {
+        "xp": 35,
+        "coins": 20,
+        "unlock": "underground_shortcut"
+      }
+    },
+    {
+      "id": "gray_missing_watch",
+      "title": "O vigia desaparecido",
+      "giver": "Dário",
+      "objectives": [
+        "Seguir rastros do aqueduto",
+        "Resgatar Cael"
+      ],
+      "reward": {
+        "xp": 40,
+        "unlock": "safe_shortcut"
+      }
+    },
+    {
+      "id": "gray_tower_echoes",
+      "title": "Ecos na torre",
+      "giver": "Íria",
+      "objectives": [
+        "Encontrar 3 páginas do astrônomo",
+        "Entregar as páginas"
+      ],
+      "reward": {
+        "xp": 35,
+        "lore": "A origem do Cristal da Aurora"
+      }
+    },
+    {
+      "id": "gray_shared_table",
+      "title": "Uma mesa para todos",
+      "giver": "Cozinheira da aldeia",
+      "objectives": [
+        "Entregar ingredientes",
+        "Convidar dois NPCs de facções diferentes"
+      ],
+      "reward": {
+        "xp": 25,
+        "item": "refeição de cura",
+        "reputation": "vale_united"
+      }
+    },
+    {
+      "id": "gray_squire_duel",
+      "title": "O desafio do escudeiro",
+      "giver": "Escudeiro da pedreira",
+      "optional": true,
+      "objectives": [
+        "Vencer o duelo amistoso"
+      ],
+      "reward": {
+        "xp": 30,
+        "item": "broquel do vale"
+      }
+    }
+  ],
+  "characters": [
+    {
+      "id": "gray_lina",
+      "name": "Lina",
+      "role": "mensageira",
+      "assetCandidate": "Peasant"
+    },
+    {
+      "id": "gray_dario",
+      "name": "Dário",
+      "role": "guardião do poço",
+      "assetCandidate": "Peasant"
+    },
+    {
+      "id": "gray_mira",
+      "name": "Mira",
+      "role": "agricultora",
+      "assetCandidate": "Peasant"
+    },
+    {
+      "id": "gray_bram",
+      "name": "Bram",
+      "role": "ferreiro",
+      "assetCandidate": "Knight"
+    },
+    {
+      "id": "gray_narek",
+      "name": "Narek",
+      "role": "chefe dos exilados",
+      "assetCandidate": "Orc"
+    },
+    {
+      "id": "gray_iria",
+      "name": "Íria",
+      "role": "astrônoma",
+      "assetCandidate": "Wizzard"
+    },
+    {
+      "id": "gray_cael",
+      "name": "Cael",
+      "role": "vigia resgatável",
+      "assetCandidate": "Rogue"
+    }
+  ],
+  "technicalConstraints": [
+    "Não editar nem substituir o HTML até que o mapa e as transições sejam integrados de forma aditiva.",
+    "Não alterar os IDs dos três mapas existentes.",
+    "Usar estado novo com prefixo gray_ e defaults compatíveis com saves antigos.",
+    "Usar IDs exclusivos gray_* para objetos persistentes.",
+    "Não reutilizar flags atuais S.m, S.b, S.q, S.z, S.br ou chaves existentes de S.o.",
+    "Não integrar FreeEnvironment até confirmar sua licença.",
+    "Preservar a licença e os termos do Pixel Crawler junto aos assets."
+  ]
+}
