@@ -248,5 +248,6 @@ function intro(){say('Narrador',['Pinheiral amanhece em silêncio. Pela primeira
 /* ---------- carga ---------- */
 let last=0;function loop(ts){const dt=Math.min(.05,(ts-last)/1000||0);last=ts;if(run){upd(dt);draw()}requestAnimationFrame(loop)}
 let n=0;const ks=Object.keys(M);ks.forEach(k=>{const i=new Image();i.onload=()=>{M[k].i=i;if(++n==ks.length){$('ld').style.display='none';$('mn').style.display='block';try{if(localStorage.getItem('pinh1'))$('ct').style.display='inline-block'}catch(e){}requestAnimationFrame(loop)}};i.src=M[k].s});
+if(location.search.includes('test=1'))window.__PINHEIRAL_TEST__={start:(state,checkpoint)=>start(state,checkpoint),maps:()=>W.map(z=>({id:z.id,name:z.nm,w:z.w,h:z.h,npcs:z.n.length,items:z.p.length,enemies:z.e.length})),enterGray:()=>{A=W[3];P.x=28*T;P.y=32*T},collect:id=>{const q=A.p.find(p=>p.id===id);if(!q)return false;near=q;act();return true},state:()=>JSON.parse(JSON.stringify(S.gray))};
 })();
 </script></body></html>
