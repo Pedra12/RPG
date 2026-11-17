@@ -1,0 +1,153 @@
+name: Audit game asset archives
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/audit-assets.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  extract-and-package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Recursively extract ZIP archives and inventory assets
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import os, json, zipfile, shutil, hashlib
+          from pathlib import Path
+          from collections import Counter
+
+          root = Path(".")
+          out = Path("audit-output")
+          extracted = out / "extracted"
+          extracted.mkdir(parents=True, exist_ok=True)
+          report = {
+              "repository": "Pedra12/RPG",
+              "archives": [],
+              "files": [],
+              "errors": [],
+              "limits": {"max_depth": 10, "max_total_uncompressed_bytes": 3000000000}
+          }
+          total_bytes = 0
+          seen = set()
+
+          def safe_name(name):
+              p = Path(name)
+              if p.is_absolute() or ".." in p.parts:
+                  return None
+              return p
+
+          def inspect_zip(zip_path, dest, depth=0, origin=None):
+              global total_bytes
+              if depth > 10:
+                  report["errors"].append({"archive": str(zip_path), "error": "Limite de profundidade excedido"})
+                  return
+              try:
+                  with zipfile.ZipFile(zip_path) as z:
+                      bad = z.testzip()
+                      entries = z.infolist()
+                      item = {
+                          "archive": str(zip_path),
+                          "origin": origin,
+                          "depth": depth,
+                          "entries": len(entries),
+                          "compressed_bytes": zip_path.stat().st_size,
+                          "uncompressed_bytes": sum(i.file_size for i in entries),
+                          "integrity": "OK" if bad is None else "CORRUPT: " + str(bad),
+                          "contents": []
+                      }
+                      report["archives"].append(item)
+                      for info in entries:
+                          rel = safe_name(info.filename)
+                          if rel is None:
+                              report["errors"].append({"archive": str(zip_path), "entry": info.filename, "error": "Caminho inseguro ignorado"})
+                              continue
+                          if info.is_dir():
+                              (dest / rel).mkdir(parents=True, exist_ok=True)
+                              continue
+                          total_bytes += info.file_size
+                          if total_bytes > report["limits"]["max_total_uncompressed_bytes"]:
+                              raise RuntimeError("Limite total de extração excedido")
+                          target = dest / rel
+                          target.parent.mkdir(parents=True, exist_ok=True)
+                          data = z.read(info)
+                          target.write_bytes(data)
+                          item["contents"].append({"path": info.filename, "size": info.file_size})
+                          if zipfile.is_zipfile(target):
+                              nested_dest = target.parent / (target.stem + "__extracted")
+                              nested_dest.mkdir(parents=True, exist_ok=True)
+                              inspect_zip(target, nested_dest, depth + 1, str(zip_path) + "!" + info.filename)
+              except Exception as e:
+                  report["errors"].append({"archive": str(zip_path), "error": str(e)})
+
+          for archive in sorted(root.rglob("*.zip")):
+              if ".git" in archive.parts or "audit-output" in archive.parts:
+                  continue
+              rel = archive.relative_to(root)
+              target_dir = extracted / rel.parent / (archive.stem + "__extracted")
+              target_dir.mkdir(parents=True, exist_ok=True)
+              inspect_zip(archive, target_dir)
+
+          extensions = Counter()
+          for p in sorted(extracted.rglob("*")):
+              if p.is_file():
+                  ext = p.suffix.lower() or "[sem extensão]"
+                  extensions[ext] += 1
+                  data = p.read_bytes()
+                  entry = {
+                      "path": str(p.relative_to(extracted)),
+                      "size": len(data),
+                      "extension": ext,
+                      "sha256": hashlib.sha256(data).hexdigest()
+                  }
+                  try:
+                      from PIL import Image
+                      import io
+                      im = Image.open(io.BytesIO(data))
+                      entry["image"] = {
+                          "format": im.format, "width": im.width, "height": im.height,
+                          "frames": getattr(im, "n_frames", 1),
+                          "mode": im.mode
+                      }
+                  except Exception:
+                      pass
+                  report["files"].append(entry)
+
+          report["extension_counts"] = dict(sorted(extensions.items()))
+          report["total_extracted_bytes"] = total_bytes
+          report["total_files"] = len(report["files"])
+          (out / "inventory.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+          lines = [
+              "# Inventário de assets - Pedra12/RPG",
+              "",
+              f"Arquivos extraídos: {report['total_files']}",
+              f"Bytes descompactados (contagem ZIP): {total_bytes}",
+              "",
+              "## Arquivos por extensão"
+          ]
+          lines += [f"- {k}: {v}" for k, v in sorted(extensions.items())]
+          lines += ["", "## Arquivos compactados"]
+          for a in report["archives"]:
+              lines.append(f"- {a['archive']} | {a['entries']} entradas | integridade: {a['integrity']} | profundidade: {a['depth']}")
+          lines += ["", "## Erros"]
+          lines += [f"- {e}" for e in report["errors"]] or ["- Nenhum"]
+          (out / "INVENTARIO.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+          print((out / "INVENTARIO.md").read_text())
+          PY
+
+      - name: Upload extracted assets and inventory
+        uses: actions/upload-artifact@v4
+        with:
+          name: pinheiral-assets-audit
+          path: audit-output/
+          if-no-files-found: error
+          retention-days: 7
