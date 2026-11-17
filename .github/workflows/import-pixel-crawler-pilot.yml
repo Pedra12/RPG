@@ -1,0 +1,90 @@
+name: Import verified Pixel Crawler pilot sheets
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  import-pilot-sheets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract only the 12 visually verified pilot sheets
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile
+          import shutil
+
+          archive = Path("Pixel Crawler - Free Pack (Exterior 0.1).zip")
+          if not archive.is_file():
+              raise SystemExit(f"Arquivo de origem não encontrado: {archive}")
+
+          targets = {
+              "Entities/Mobs/Skeleton Crew/Skeleton - Base/Idle/Idle-Sheet.png": "assets/characters/pixel-crawler/skeleton-base/idle.png",
+              "Entities/Mobs/Skeleton Crew/Skeleton - Base/Run/Run-Sheet.png": "assets/characters/pixel-crawler/skeleton-base/run.png",
+              "Entities/Mobs/Skeleton Crew/Skeleton - Base/Death/Death-Sheet.png": "assets/characters/pixel-crawler/skeleton-base/death.png",
+              "Entities/Mobs/Orc Crew/Orc/Idle/Idle-Sheet.png": "assets/characters/pixel-crawler/orc-base/idle.png",
+              "Entities/Mobs/Orc Crew/Orc/Run/Run-Sheet.png": "assets/characters/pixel-crawler/orc-base/run.png",
+              "Entities/Mobs/Orc Crew/Orc/Death/Death-Sheet.png": "assets/characters/pixel-crawler/orc-base/death.png",
+              "Entities/Npc's/Knight/Idle/Idle-Sheet.png": "assets/characters/pixel-crawler/knight/idle.png",
+              "Entities/Npc's/Knight/Run/Run-Sheet.png": "assets/characters/pixel-crawler/knight/run.png",
+              "Entities/Npc's/Knight/Death/Death-Sheet.png": "assets/characters/pixel-crawler/knight/death.png",
+              "Entities/Npc's/Wizzard/Idle/Idle-Sheet.png": "assets/characters/pixel-crawler/wizard/idle.png",
+              "Entities/Npc's/Wizzard/Run/Run-Sheet.png": "assets/characters/pixel-crawler/wizard/run.png",
+              "Entities/Npc's/Wizzard/Death/Death-Sheet.png": "assets/characters/pixel-crawler/wizard/death.png"
+          }
+
+          with ZipFile(archive) as z:
+              names = z.namelist()
+              for suffix, destination in targets.items():
+                  matches = [n for n in names if n.endswith(suffix)]
+                  if len(matches) != 1:
+                      raise SystemExit(f"Esperado 1 arquivo para {suffix}; encontrados: {len(matches)}")
+                  out = Path(destination)
+                  out.parent.mkdir(parents=True, exist_ok=True)
+                  out.write_bytes(z.read(matches[0]))
+                  print(f"Importado: {matches[0]} -> {out} ({out.stat().st_size} bytes)")
+
+              terms = [n for n in names if n.endswith("Terms.txt")]
+              if len(terms) != 1:
+                  raise SystemExit(f"Esperado 1 Terms.txt; encontrados: {len(terms)}")
+              license_out = Path("assets/characters/pixel-crawler/TERMS-SOURCE.txt")
+              license_out.parent.mkdir(parents=True, exist_ok=True)
+              license_out.write_bytes(z.read(terms[0]))
+              print(f"Licença copiada: {terms[0]}")
+
+          print(f"Total de sprites importados: {len(targets)}")
+          PY
+
+      - name: Verify imported PNG files
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          files = sorted(Path("assets/characters/pixel-crawler").glob("*/*.png"))
+          if len(files) != 12:
+              raise SystemExit(f"Esperados 12 PNGs, encontrados {len(files)}")
+          for path in files:
+              with Image.open(path) as image:
+                  image.verify()
+              print(path)
+          print("Verificação concluída: 12 PNGs válidos.")
+          PY
+
+      - name: Commit imported assets without touching the game HTML
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/characters/pixel-crawler
+          if git diff --cached --quiet; then
+            echo "Nenhuma alteração nova para commit."
+          else
+            git commit -m "Import verified Pixel Crawler pilot animation sheets"
+            git push
+          fi
